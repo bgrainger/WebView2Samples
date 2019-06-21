@@ -1,2 +1,6 @@
 # VS Code
 .vscode/
+.vs/
+Debug/
+Release/
+packages/
