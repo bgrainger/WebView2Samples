@@ -103,8 +103,52 @@ int CALLBACK WinMain(
 
 	// <-- WebView2 sample code starts here -->
 
+	// Step 3 - Create a single WebView within the parent window
+	// Known issue - app needs to run on PerMonitorV2 DPI awareness for WebView to look properly
+	SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
 
-	
+	// Locate the browser and set up the environment for WebView
+	CreateWebView2EnvironmentWithDetails(nullptr, nullptr, WEBVIEW2_RELEASE_CHANNEL_PREFERENCE_CANARY, nullptr,
+		Callback<IWebView2CreateWebView2EnvironmentCompletedHandler>(
+			[hWnd](HRESULT result, IWebView2Environment* env) -> HRESULT {
+
+				// Create a WebView, whose parent is the main window hWnd
+				env->CreateWebView(hWnd, Callback<IWebView2CreateWebViewCompletedHandler>(
+					[hWnd](HRESULT result, IWebView2WebView* webview) -> HRESULT {
+					if (webview != nullptr) {
+						webviewWindow = webview;
+					}
+
+					// Add a few settings for the webview
+					// this is a redundant demo step as they are the default settings values
+					IWebView2Settings* Settings;
+					webviewWindow->get_Settings(&Settings);
+					Settings->put_IsScriptEnabled(TRUE);
+					Settings->put_AreDefaultScriptDialogsEnabled(TRUE);
+					Settings->put_IsWebMessageEnabled(TRUE);
+
+					// Resize WebView to fit the bounds of the parent window
+					RECT bounds;
+					GetClientRect(hWnd, &bounds);
+					webviewWindow->put_Bounds(bounds);
+
+					// Schedule an async task to navigate to Bing
+					webviewWindow->Navigate(L"https://www.bing.com/");
+
+					// Step 4 - Navigation events
+
+
+					// Step 5 - Scripting
+
+
+					// Step 6 - Communication between host and web content
+
+
+					return S_OK;
+				}).Get());
+			return S_OK;
+		}).Get());
+
 	// <-- WebView2 sample code ends here -->
 
 	// Main message loop:
