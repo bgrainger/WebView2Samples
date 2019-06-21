@@ -132,23 +132,20 @@ int CALLBACK WinMain(
 					GetClientRect(hWnd, &bounds);
 					webviewWindow->put_Bounds(bounds);
 
-					// Schedule an async task to navigate to Bing
-					webviewWindow->Navigate(L"https://www.bing.com/");
-
 					// Step 4 - Navigation events
 					// register an IWebView2NavigationStartingEventHandler to cancel any non-https navigation
 					EventRegistrationToken token;
 					webviewWindow->add_NavigationStarting(Callback<IWebView2NavigationStartingEventHandler>(
 						[](IWebView2WebView* webview, IWebView2NavigationStartingEventArgs * args) -> HRESULT {
-							PWSTR uri;
-							args->get_Uri(&uri);
-							std::wstring source(uri);
-							if (source.substr(0, 5) != L"https") {
-								args->put_Cancel(true);
-							}
-							CoTaskMemFree(uri);
+							IWebView2HttpRequestHeaders* headers = nullptr;
+							args->get_RequestHeaders(&headers);
+							HRESULT hr = headers->SetHeader(L"X-Test", L"test");
+							headers->Release();
 							return S_OK;
 						}).Get(), &token);
+
+					// Schedule an async task to navigate to Bing
+					webviewWindow->Navigate(L"https://www.bing.com/");
 
 					// Step 5 - Scripting
 
