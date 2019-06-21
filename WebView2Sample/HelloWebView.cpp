@@ -6,6 +6,7 @@
 #include <tchar.h>
 #include <wrl.h>
 // include WebView2 header
+#include "WebView2.h"
 
 
 using namespace Microsoft::WRL;
